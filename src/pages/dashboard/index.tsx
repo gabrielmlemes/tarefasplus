@@ -3,8 +3,13 @@ import styles from "./styles.module.css";
 import { GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
 import Textarea from "@/src/components/textarea";
+import { useState } from "react";
+import { FiShare2 } from "react-icons/fi";
+import { FaTrash } from "react-icons/fa";
 
 const Dashboard = () => {
+  const [task, setTask] = useState([]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -29,6 +34,25 @@ const Dashboard = () => {
               </button>
             </form>
           </div>
+        </section>
+
+        <section className={styles.tasksContainer}>
+          <h2>Minhas tarefas</h2>
+          <article className={styles.task}>
+            <div className={styles.tagContainer}>
+              <label className={styles.tag}>Público</label>
+              <button className={styles.shareButton}>
+                <FiShare2 size={22} color="#3183ff" />
+              </button>
+            </div>
+
+            <div className={styles.taskContent}>
+              <p>Minha primeira tarefa</p>
+              <button className={styles.trashButton}>
+                <FaTrash size={24} color="#ea3140" />
+              </button>
+            </div>
+          </article>
         </section>
       </main>
     </div>
