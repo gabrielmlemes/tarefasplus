@@ -13,8 +13,11 @@ import {
   query,
   getDoc,
   addDoc,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import Textarea from "@/src/components/textarea";
+import { FaTrash } from "react-icons/fa";
 
 interface TaskProps {
   item: {
@@ -24,12 +27,24 @@ interface TaskProps {
     user: string;
     taskId: string;
   };
+  allComments: CommentsProps[];
 }
 
-const Task = ({ item }: TaskProps) => {
+interface CommentsProps {
+  id: string;
+  comment: string;
+  taskId: string;
+  user: string;
+  name: string;
+}
+
+const Task = ({ item, allComments }: TaskProps) => {
   const [input, setInput] = useState("");
   const { data: session } = useSession();
 
+  const [comments, setComments] = useState<CommentsProps[]>(allComments || []);
+
+  //   Registrar comentário
   async function handleComment(e: FormEvent) {
     e.preventDefault();
 
@@ -46,7 +61,30 @@ const Task = ({ item }: TaskProps) => {
         taskId: item?.taskId,
       });
 
+      const data = {
+        id: docRef.id,
+        comment: input,
+        user: session?.user?.email,
+        name: session?.user?.name,
+        taskId: item?.taskId,
+      };
+
+      setComments((oldItems) => [...oldItems, data]);
+
       setInput("");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // Deletar comentário
+  async function handleDelete(id: string) {
+    try {
+      const docRef = doc(db, "comments", id);
+      await deleteDoc(docRef);
+
+      const remainingComments = comments.filter((item) => item.id !== id)
+      setComments(remainingComments)
     } catch (error) {
       console.log(error);
     }
@@ -85,6 +123,31 @@ const Task = ({ item }: TaskProps) => {
             </button>
           </form>
         </section>
+
+        <section className={styles.commentsContainer}>
+          <h2>Todos os comentários</h2>
+
+          <article>
+            {comments.length === 0 && <span>Nenhum comentário</span>}
+
+            {comments.map((item) => (
+              <article key={item.id} className={styles.comment}>
+                <div className={styles.box}>
+                  <label className={styles.name}>{item.name}</label>
+                  {item.user === session?.user?.email && (
+                    <button
+                      className={styles.trashButton}
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      <FaTrash size={14} color="#ea3140" />
+                    </button>
+                  )}
+                </div>
+                <p>{item.comment}</p>
+              </article>
+            ))}
+          </article>
+        </section>
       </main>
     </div>
   );
@@ -96,6 +159,20 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
   const docRef = doc(db, "tarefas", id);
   const snapshot = await getDoc(docRef);
+
+  const q = query(collection(db, "comments"), where("taskId", "==", id));
+  const snapshotComments = await getDocs(q);
+
+  const allComments: CommentsProps[] = [];
+  snapshotComments.forEach((doc) => {
+    allComments.push({
+      id: doc.id,
+      taskId: doc.data().taskId,
+      user: doc.data().user,
+      comment: doc.data().comentario,
+      name: doc.data().name,
+    });
+  });
 
   //    Redireciona o usuário para a home caso o id pesquisado seja undefined
   if (snapshot.data() === undefined) {
@@ -130,6 +207,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   return {
     props: {
       item: task,
+      allComments: allComments,
     },
   };
 };
