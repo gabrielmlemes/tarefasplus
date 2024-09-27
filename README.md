@@ -1,6 +1,6 @@
 
-![Mockup do projeto](https://i.ibb.co/q5zfLcy/1-Fd-Ju9-Fe.png) 
-![Mockup do projeto](https://i.ibb.co/1nvyMKv/2-f-Zb-Kcmc.png)
+![Mockup do projeto](https://i.ibb.co/WP11Fxm/i-Phone-15-Pro-Max-Mockup-Front-View-2.png) 
+![Mockup do projeto](https://i.ibb.co/LCGJqj6/Macbook-Mockup-Front-View-UV.png)
 
 # Tarefas +
 
